@@ -8,7 +8,7 @@
         </template>
         </b-table>
         <b-modal id="modal1" @hide="resetModal" ok-only>
-          <h4 class="my-1 py-1" slot="modal-header">Index: {{ modalDetails.index }}</h4>
+          <h4 class="my-1 py-1" slot="modal-header">Index: {{ modalDetails.ID }}</h4>
           <pre>{{ modalDetails.data }}</pre>
         </b-modal>
       </div>
@@ -17,25 +17,15 @@
 
 <script>
 import Navbar from "@/components/Navbar";
-let axios = require("axios");
 
 const Url = "https://receptacle-worker:8443";
-let items
-function GetContInfo() {
-  axios.get(Url + "/api/containers")
-    .then(function(response) {
-      items = response.data
-    })
-    .catch(function(error) {
-      console.log(error);
-    });
-}
+
 const fields = {
-  ID: { label: "ID" },
-  Name: { label: "Name" },
-  Image: { label: "Image" },
-  Uptime: { label: "Uptime" },
-  State: { label: "State" },
+  ID: { label: "ID", sortable: true, formatter: (value) => { return value.substring(0,12)} },
+  Name: { label: "Name", sortable: true, formatter: (value) => { return value.toString().substring(1) } },
+  Image: { label: "Image", sortable: true },
+  Created: { label: "Created" },
+  State: { label: "State", sortable: true },
   Actions: { label: "Actions" }
 };
 
@@ -46,20 +36,27 @@ export default {
   },
   data() {
     return {
-      items: items,
+      items: [],
       fields: fields,
-      modalDetails: { index: "", data: "" }
+      modalDetails: { ID: "", data: "" }
     };
   },
+  created() {
+    this.$http.get(Url + '/api/containers').then(response => {
+      this.items = response.body;
+    }), response => {
+      console.log(response)
+    }
+  },
   methods: {
-    details(item, index, button) {
+    details(item, button) {
       this.modalDetails.data = JSON.stringify(item, null, 2);
-      this.modalDetails.index = index;
+      this.modalDetails.ID = item.ID.substring(0,12)
       this.$root.$emit("bv::show::modal", "modal1", button);
     },
     resetModal() {
       this.modalDetails.data = "";
-      this.modalDetails.index = "";
+      this.modalDetails.ID = "";
     }
   }
 };
