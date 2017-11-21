@@ -18,7 +18,7 @@
 <script>
 import Navbar from "@/components/Navbar";
 
-const Url = "https://receptacle-worker:8443";
+const Url = "http://localhost:8443/api";
 
 const fields = {
   ID: { label: "ID", sortable: true, formatter: (value) => { return value.substring(0,12)} },
@@ -42,7 +42,7 @@ export default {
     };
   },
   created() {
-    this.$http.get(Url + '/api/containers').then(response => {
+    this.$http.get(Url + '/containers/').then(response => {
       this.items = response.body;
     }), response => {
       console.log(response)
