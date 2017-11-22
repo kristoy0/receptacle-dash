@@ -2,15 +2,34 @@
   <div>
       <Navbar/>
       <div class="container">
-      <b-table striped hover show-empty :items="items" :fields="fields">
-        <template slot="Actions" slot-scope="row">
-          <b-btn size="sm" @click.stop="details(row.item,row.index,$event.target)">Details</b-btn>
-        </template>
-        </b-table>
-        <b-modal id="modal1" @hide="resetModal" ok-only>
-          <h4 class="my-1 py-1" slot="modal-header">Index: {{ modalDetails.ID }}</h4>
-          <pre>{{ modalDetails.data }}</pre>
-        </b-modal>
+        <table class="table table-striped borderless">
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Image</th>
+            <th>Created</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+          <tr v-for="item in items">
+            <td>{{ item.ID.substring(0,12) }}</td>
+            <td>{{ item.Name[0].substring(1) }}</td>
+            <td>{{ item.Image }}</td>
+            <td>{{ item.Created }}</td>
+            <td>{{ item.State }}</td>
+            <td>
+              <b-button-group>
+                <b-button variant="danger" size="sm" v-if="item.State == 'running'" v-on:click="stop(item.ID)"><i class="fa fa-stop-circle"></i></b-button>
+                <b-button variant="success" size="sm" v-else v-on:click="start(item.ID)"><i class="fa fa-play-circle"></i></b-button>
+                <b-dropdown size="sm" variant="primary" id="ddown1" text="">
+                  <b-dropdown-item v-if="item.State == 'paused'" v-on:click="unpause(item.ID)">Unpause</b-dropdown-item>
+                  <b-dropdown-item v-else v-on:click="pause(item.ID)">Pause</b-dropdown-item>
+                  <b-dropdown-item v-on:click="remove(item.ID)">Delete</b-dropdown-item>
+                </b-dropdown>
+              </b-button-group>
+            </td>
+          </tr>
+        </table>
       </div>
   </div>
 </template>
@@ -20,15 +39,6 @@ import Navbar from "@/components/Navbar";
 
 const Url = "http://localhost:8443/api";
 
-const fields = {
-  ID: { label: "ID", sortable: true, formatter: (value) => { return value.substring(0,12)} },
-  Name: { label: "Name", sortable: true, formatter: (value) => { return value.toString().substring(1) } },
-  Image: { label: "Image", sortable: true },
-  Created: { label: "Created" },
-  State: { label: "State", sortable: true },
-  Actions: { label: "Actions" }
-};
-
 export default {
   name: "Containers",
   components: {
@@ -36,27 +46,52 @@ export default {
   },
   data() {
     return {
-      items: [],
-      fields: fields,
-      modalDetails: { ID: "", data: "" }
+      items: []
     };
   },
   created() {
-    this.$http.get(Url + '/containers/').then(response => {
+    this.$http.get(Url + "/containers/").then(response => {
       this.items = response.body;
-    }), response => {
-      console.log(response)
-    }
+    }),
+      response => {
+        console.log(response);
+      };
   },
   methods: {
-    details(item, button) {
-      this.modalDetails.data = JSON.stringify(item, null, 2);
-      this.modalDetails.ID = item.ID.substring(0,12)
-      this.$root.$emit("bv::show::modal", "modal1", button);
+    stop(id) {
+      this.$http.post(Url + "/containers/" + id + "/stop/").then(response => {
+        console.log("Stopped: " + id)
+      }, response => {
+        console.log(response)
+      });
     },
-    resetModal() {
-      this.modalDetails.data = "";
-      this.modalDetails.ID = "";
+    start(id) {
+      this.$http.post(Url + "/containers/" + id + "/start/").then(response => {
+        console.log("Started: " + id)
+      }, response => {
+        console.log(response)
+      });
+    },
+    pause(id) {
+      this.$http.post(Url + "/containers/" + id + "/pause/").then(response => {
+        console.log("Paused: " + id)
+      }, response => {
+        console.log(response)
+      });
+    },
+    unpause(id) {
+      this.$http.post(Url + "/containers/" + id + "/unpause/").then(response => {
+        console.log("Unpaused: " + id)
+      }, response => {
+        console.log(response)
+      });
+    },
+    remove(id) {
+      this.$http.post(Url + "/containers/" + id + "/delete/true").then(response => {
+        console.log("Removed: " + id)
+      }, response => {
+        console.log(response)
+      });
     }
   }
 };
