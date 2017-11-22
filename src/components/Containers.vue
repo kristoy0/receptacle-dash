@@ -35,66 +35,65 @@
 </template>
 
 <script>
-import Navbar from "@/components/Navbar";
+import Navbar from '@/components/Navbar'
 
-const Url = "http://localhost:8443/api";
+const Url = 'http://localhost:8443/api'
 
 export default {
-  name: "Containers",
+  name: 'Containers',
   components: {
     Navbar: Navbar
   },
-  data() {
+  data () {
     return {
       items: []
-    };
+    }
   },
-  created() {
-    this.$http.get(Url + "/containers/").then(response => {
-      this.items = response.body;
-    }),
-      response => {
-        console.log(response);
-      };
+  created () {
+    this.$http.get(Url + '/containers/').then(response => {
+      this.items = response.body
+    }, response => {
+      console.log(response)
+    })
   },
   methods: {
-    stop(id) {
-      this.$http.post(Url + "/containers/" + id + "/stop/").then(response => {
-        console.log("Stopped: " + id)
+    stop (id) {
+      this.$http.post(Url + '/containers/' + id + '/stop/').then(response => {
+        console.log('Stopped: ' + id)
       }, response => {
         console.log(response)
-      });
+      })
     },
-    start(id) {
-      this.$http.post(Url + "/containers/" + id + "/start/").then(response => {
-        console.log("Started: " + id)
+    start (id) {
+      this.$http.post(Url + '/containers/' + id + '/start/').then(response => {
+        console.log('Started: ' + id)
       }, response => {
         console.log(response)
-      });
+      })
     },
-    pause(id) {
-      this.$http.post(Url + "/containers/" + id + "/pause/").then(response => {
-        console.log("Paused: " + id)
+    pause (id) {
+      this.$http.post(Url + '/containers/' + id + '/pause/').then(response => {
+        console.log('Paused: ' + id)
       }, response => {
         console.log(response)
-      });
+      })
     },
-    unpause(id) {
-      this.$http.post(Url + "/containers/" + id + "/unpause/").then(response => {
-        console.log("Unpaused: " + id)
+    unpause (id) {
+      this.$http.post(Url + '/containers/' + id + '/unpause/').then(response => {
+        console.log('Unpaused: ' + id)
       }, response => {
         console.log(response)
-      });
+      })
     },
-    remove(id) {
-      this.$http.post(Url + "/containers/" + id + "/delete/true").then(response => {
-        console.log("Removed: " + id)
+    remove (id) {
+      this.$http.post(Url + '/containers/' + id + '/delete/true').then(response => {
+        console.log('Removed: ' + id)
       }, response => {
         console.log(response)
-      });
+      })
     }
   }
-};
+}
 </script>
 
 <style scoped>
