@@ -33,7 +33,7 @@
         </table>
       </div>
       <b-modal id="modal1" @hide="resetModal" @ok="handleOk(modalDetails.action, modalDetails.id)">
-          <h4 class="my-1 py-1" slot="modal-header">Index: {{ modalDetails.header }}</h4>
+          <h4 class="my-1 py-1" slot="modal-header">{{ modalDetails.header }}</h4>
           <pre>{{ modalDetails.data }}</pre>
       </b-modal>
   </div>
@@ -50,7 +50,7 @@ export default {
   data () {
     return {
       items: [],
-      modalDetails: { index: '', data: '' }
+      modalDetails: { header: '', data: '', action: '', id: '' }
     }
   },
   created () {
@@ -62,7 +62,7 @@ export default {
   },
   methods: {
     details (item, button) {
-      this.modalDetails.header = item.ID.substring(0, 12)
+      this.modalDetails.header = 'Id: ' + item.ID.substring(0, 12)
       this.modalDetails.data = JSON.stringify(item, null, 2)
       this.$root.$emit('bv::show::modal', 'modal1', button)
     },
@@ -73,7 +73,7 @@ export default {
       this.modalDetails.id = ''
     },
     handleOk (action, id) {
-      this.$http.post(Url + '/containers/' + id + '/' + action + '/').then(response => {
+      this.$http.post(Url + '/containers/' + id + '/' + action).then(response => {
         console.log(action + ' ' + id)
       }, response => {
         console.log(response)
