@@ -28,9 +28,11 @@
                 <b-form-group id="memoryGroup" horizontal description="Add a memory limitation to your container e.g. 1G, 512M (0 for unlimited)." label="Memory limit">
                     <b-form-input id="memoryInput" v-model="form.memory"></b-form-input>
                 </b-form-group>
+                <!-- TODO: Restart on failure policy not working -->
                 <b-form-group id="restartGroup" horizontal description="Add a restart policy." label="Restart policy">
                     <b-form-select id="restartInput" :options="restartOptions" v-model="form.restartPolicy"></b-form-select>
                 </b-form-group>
+                <!-- TODO: Autoremove not working -->
                 <!-- <b-form-group id="removeGroup" horizontal description="Automatically remove container when exited." label="Autoremove">
                     <b-form-select id="removeInput" :options="removeOptions" v-model="form.autoRemove"></b-form-select>
                 </b-form-group> -->

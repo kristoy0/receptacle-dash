@@ -1,6 +1,9 @@
 <template>
   <div>
       <Navbar/>
+      <b-alert :show="dismissCountDown" dismissible variant="success" @dismissed="dismissCountdown=0" @dismiss-count-down="countDownChanged">
+        <p>Image deleted.</p>
+      </b-alert>
       <div class="container">
         <table class="table table-striped borderless">
           <tr>
@@ -18,7 +21,7 @@
             <td>
               <b-button-group>
                 <b-btn size="sm" @click.stop="details(item, $event.target)">Details</b-btn>
-                <b-button variant="danger" size="sm" v-on:click="remove(item.ID)"><i class="fa fa-minus-circle"></i></b-button>
+                <b-button variant="danger" size="sm" @click="remove(item.ID)"><i class="fa fa-minus-circle"></i></b-button>
               </b-button-group>
             </td>
           </tr>
@@ -42,28 +45,35 @@ export default {
   data () {
     return {
       items: [],
-      modalDetails: { header: '', data: '', id: '' }
+      modalDetails: { header: '', data: '', id: '' },
+      dismissSecs: 2,
+      dismissCountDown: 0
     }
   },
   created () {
-    this.$http.get(Url + '/images/').then(response => {
-      this.items = response.body.filter(item => {
-        return item.Name[0] !== '<none>:<none>'
-      })
-    }, response => {
-      console.log(response)
-    })
+    this.getImgs()
   },
   methods: {
+    getImgs () {
+      this.$http.get(Url + '/images/').then(response => {
+        this.items = response.body.filter(item => {
+          return item.Name[0] !== '<none>:<none>'
+        })
+      }, response => {
+        console.log(response)
+      })
+    },
     details (item, button) {
       this.modalDetails.header = 'Id: ' + item.ID.substring(0, 12)
       this.modalDetails.data = JSON.stringify(item, null, 2)
       this.$root.$emit('bv::show::modal', 'modal1', button)
     },
     resetModal () {
+      setTimeout(this.showAlert(), 700)
       this.modalDetails.data = ''
       this.modalDetails.header = ''
       this.modalDetails.id = ''
+      setTimeout(this.getImgs, 500)
     },
     handleOk (id) {
       this.$http.post(Url + '/images/' + id).then(response => {
@@ -77,6 +87,12 @@ export default {
       this.modalDetails.data = 'Are you sure you want to delete image: ' + id.substring(7, 19) + '?'
       this.modalDetails.id = id
       this.$root.$emit('bv::show::modal', 'modal1', button)
+    },
+    countDownChanged (dismissCountDown) {
+      this.dismissCountDown = dismissCountDown
+    },
+    showAlert () {
+      this.dismissCountDown = this.dismissSecs
     }
   }
 }
@@ -85,5 +101,8 @@ export default {
 <style scoped>
 .container {
   padding-top: 32px;
+}
+p {
+  margin: auto;
 }
 </style>
