@@ -1,7 +1,7 @@
 <template>
   <div>
       <Navbar/>
-      <b-alert :show="dismissCountDown" dismissible variant="success" @dismissed="dismissCountdown=0" @dismiss-count-down="countDownChanged">
+      <b-alert :show="dismissCountDown" dismissible :variant="alertVariant" @dismissed="dismissCountdown=0" @dismiss-count-down="countDownChanged">
         {{ alertData }}
       </b-alert>
       <div class="container">
@@ -63,6 +63,7 @@
                 <b-button type="submit" variant="primary">Submit</b-button>
                 <b-button type="reset" variant="secondary">Reset</b-button>
             </form>
+          <p v-if="waiting">Creating container, please wait.</p>
           <div :class="{ loader: waiting }"></div>
         </b-modal>
   </div>
@@ -83,6 +84,7 @@ export default {
       dismissSecs: 3,
       dismissCountDown: 0,
       alertData: '',
+      alertVariant: '',
       waiting: false,
       /* removeOptions: [
           { value: true, text: 'True' },
@@ -155,12 +157,14 @@ export default {
     },
     resetAlert () {
       this.alertData = ''
+      this.alertVariant = ''
     },
     handleOk (action, id) {
       if (action !== 'details') {
         this.$http.post(Url + '/containers/' + id + '/' + action).then(response => {
           this.getConts()
           this.alertData = response.data ? response.data : 'Container deleted'
+          this.alertVariant = 'success'
           this.showAlert()
         }, response => {
           console.log(response)
@@ -202,7 +206,13 @@ export default {
         console.log(response.statusText, data)
         this.hideModal()
         this.getConts()
-        this.alertData = 'Container ' + data.name + ' ' + response.statusText
+        if (response.statusText !== 'OK') {
+          this.alertData = 'Container ' + data.name + ' ' + response.statusText
+          this.alertVariant = 'success'
+        } else {
+          this.alertData = 'Something went wrong'
+          this.alertVariant = 'danger'
+        }
         this.showAlert()
       }, response => {
         console.log(response)
@@ -220,15 +230,16 @@ export default {
     padding-top: 32px;
   }
   p {
-    margin: auto;
+    margin-top: 20px;
+    float: left;  
   }
   h1 {
     margin: auto;
     padding-bottom: 2%
   }
   .loader {
-    margin: 0 auto;
-    margin-top: 10px;
+    margin-top: 20px;
+    float: right;
     border: 5px solid #f3f3f3;
     border-top: 5px solid #428bca;
     border-radius: 50%;

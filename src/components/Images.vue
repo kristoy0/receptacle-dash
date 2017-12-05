@@ -1,7 +1,7 @@
 <template>
   <div>
       <Navbar/>
-      <b-alert :show="dismissCountDown" dismissible variant="success" @dismissed="dismissCountdown=0" @dismiss-count-down="countDownChanged">
+      <b-alert :show="dismissCountDown" dismissible :variant="alertVariant" @dismissed="dismissCountdown=0" @dismiss-count-down="countDownChanged">
         {{ alertData }}
       </b-alert>
       <div class="container">
@@ -34,6 +34,7 @@
               <b-button type="submit" variant="primary">Submit</b-button>
               <b-button type="reset" variant="secondary">Reset</b-button>
             </form>
+            <p v-if="waiting">Downloading image, please wait.</p>
             <div :class="{ loader: waiting }"></div>
         </b-modal>
   </div>
@@ -51,6 +52,7 @@ export default {
     return {
       items: [],
       alertData: '',
+      alertVariant: '',
       modalDetails: { header: '', data: '', id: '', action: '' },
       dismissSecs: 3,
       dismissCountDown: 0,
@@ -77,9 +79,13 @@ export default {
     },
     getImgs () {
       this.$http.get(Url + '/images/').then(response => {
-        this.items = response.body.filter(item => {
-          return item.Name[0] !== '<none>:<none>'
-        })
+        if (response.body) {
+          this.items = response.body.filter(item => {
+            return item.Name[0] !== '<none>:<none>'
+          })
+        } else {
+          this.items = []
+        }
       }, response => {
         console.log(response)
       })
@@ -100,11 +106,13 @@ export default {
     },
     resetAlert () {
       this.alertData = ''
+      this.alertVariant = ''
     },
     handleOk (id) {
       this.$http.post(Url + '/images/' + id).then(response => {
         this.getImgs()
         this.alertData = 'Image ' + id.substring(7, 19) + ' deleted'
+        this.alertVariant = 'success'
         this.showAlert()
       }, response => {
         console.log(response)
@@ -136,7 +144,13 @@ export default {
         console.log(response.statusText, data)
         this.hideModal()
         this.getImgs()
-        this.alertData = response.statusText + ' ' + data.image + ':' + data.tags
+        if (response.statusText !== 'OK') {
+          this.alertData = 'Pulled image ' + data.image + ':' + data.tags
+          this.alertVariant = 'success'
+        } else {
+          this.alertData = 'Something went wrong'
+          this.alertVariant = 'danger'
+        }
         this.showAlert()
       }, response => {
         console.log(response)
@@ -154,15 +168,16 @@ export default {
     padding-top: 32px;
   }
   p {
-    margin: auto;
+    margin-top: 20px;
+    float: left;  
   }
   h1 {
     margin: auto;
     padding-bottom: 2%
   }
   .loader {
-    margin: 0 auto;
-    margin-top: 10px;
+    margin-top: 20px;
+    float: right;
     border: 5px solid #f3f3f3;
     border-top: 5px solid #428bca;
     border-radius: 50%;
